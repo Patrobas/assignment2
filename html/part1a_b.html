@@ -1,0 +1,414 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>part1a_b</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-02-24"><meta name="DC.source" content="part1a_b.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Publish this report</a></li></ul></div><pre class="codeinput"><span class="comment">%%%%%%%%%%%% Harmonic Wave Equation in 2D FD and Modes %%%%%%%%%%%%</span>
+<span class="comment">% By David, Patrobas, Andrew and Xiaochen</span>
+<span class="comment">% Febuary 24th, 2019</span>
+<span class="comment">% Assignment 2</span>
+<span class="comment">% Patrobas Adewumi</span>
+<span class="keyword">global</span> C;
+C.q_0 = 1.60217653e-19;             <span class="comment">% electron charge</span>
+C.hb = 1.054571596e-34;             <span class="comment">% Dirac constant</span>
+C.h = C.hb * 2 * pi;                    <span class="comment">% Planck constant</span>
+C.m_0 = 9.10938215e-31;             <span class="comment">% electron mass</span>
+C.kb = 1.3806504e-23;               <span class="comment">% Boltzmann constant</span>
+C.eps_0 = 8.854187817e-12;          <span class="comment">% vacuum permittivity</span>
+C.mu_0 = 1.2566370614e-6;           <span class="comment">% vacuum permeability</span>
+C.c = 299792458; <span class="comment">% speed of light</span>
+
+nx = 75;
+L = nx;<span class="comment">% length</span>
+ny = 50;
+W = ny; <span class="comment">% width</span>
+
+dx = 1;
+dy = 1;
+G = sparse(nx*ny, ny*nx);
+V = ones(nx*ny,1);
+alpha = (C.hb^2) / (2 * C.m_0);
+
+map = @(i,j) j + (i - 1)*ny;
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%% Part a %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">% Set boundary conditions</span>
+
+<span class="keyword">for</span> i=1:nx
+    <span class="keyword">for</span> j=1:ny
+        n = map(i,j);
+        nxm = map(i-1,j);
+        nxp = map(i+1,j);
+        nym = map(i,j-1);
+        nyp = map(i,j+1);
+
+        <span class="comment">% when Length = 0 (V = Vo)</span>
+        <span class="keyword">if</span> i == 1
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 1;
+        <span class="comment">% When lenght is some given length, L (V = 0)</span>
+        <span class="keyword">elseif</span> i == nx
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 0;
+        <span class="keyword">elseif</span> (j == 1 || j == ny)
+            G(n,:) = 0;
+            G(n,n) = -3;
+            G(n,nxm) = 1;
+            G(n,nxp) = 1;
+            G(n,nyp) = 1;
+        <span class="keyword">else</span>
+            G(n,:) = 0;
+            G(n,n) = -4;
+            G(n,nxm) = 1;
+            G(n,nxp) = 1;
+            G(n,nym) = 1;
+            G(n,nyp) = 1;
+
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+<span class="comment">% GV = F Solve for F</span>
+F = G\V;
+surfs_up = zeros(nx,ny);
+<span class="keyword">for</span> i = 1:nx
+    <span class="keyword">for</span> j = 1:ny
+        n = map(i,j);
+        surfs_up(i,j) = F(n);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+figure(1)
+surf(surfs_up)
+<span class="comment">% I am a simple man and so is the colormap</span>
+colormap <span class="string">default</span>
+shading <span class="string">interp</span>
+colorbar
+
+title(<span class="string">'Electrostatic Potential in Rectangular Region L/W = 3/2'</span>)
+xlabel(<span class="string">'Width'</span>)
+ylabel(<span class="string">'Length'</span>)
+zlabel(<span class="string">'Voltage'</span>)
+
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%% Part b %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">% Set boundary conditions</span>
+
+<span class="keyword">for</span> i=1:nx
+
+    <span class="keyword">for</span> j=1:ny
+        n = map(i,j);
+        nxm = map(i-1,j);
+        nxp = map(i+1,j);
+        nym = map(i,j-1);
+        nyp = map(i,j+1);
+
+
+        <span class="keyword">if</span> i == 1
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 1;
+
+        <span class="keyword">elseif</span> i == nx
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 1;
+        <span class="keyword">elseif</span> j == 1
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 0;
+        <span class="keyword">elseif</span> j == ny
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 0;
+        <span class="keyword">else</span>
+            G(n,:) = 0;
+            G(n,n) = -4;
+            G(n,nxm) = 1;
+            G(n,nxp) = 1;
+            G(n,nym) = 1;
+            G(n,nyp) = 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% GV = F Solve for F</span>
+F = G\V;
+<span class="comment">% Set up a surf plot</span>
+surfs_up = ones(nx,ny);
+<span class="keyword">for</span> i = 1:nx
+    <span class="keyword">for</span> j = 1:ny
+        n = map(i,j);
+        surfs_up(i,j) = F(n);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+figure(2)
+surf(surfs_up)
+<span class="comment">% I am a simple man and so is the colormap</span>
+colormap <span class="string">default</span>
+shading <span class="string">flat</span>
+colorbar
+
+title(<span class="string">'Electrostatic Potential in Rectangular Region L/W = 3/2'</span>)
+xlabel(<span class="string">'Width'</span>)
+ylabel(<span class="string">'Length'</span>)
+zlabel(<span class="string">'Voltage'</span>)
+</pre><img vspace="5" hspace="5" src="part1a_b_01.png" alt=""> <img vspace="5" hspace="5" src="part1a_b_02.png" alt=""> <h2 id="2">Publish this report</h2><p>Meshing becomes an accurate tool when the amount of points used becomes near infinite Analytical solutions can be obtained exactly with pencil and paper; Numerical solutions cannot be obtained exactly in finite time and typically cannot be solved using pencil and paper.</p><pre class="codeinput"><span class="comment">% These distinctions, however, can vary. There are increasingly many theorems</span>
+<span class="comment">% and equations that can only be solved using a computer; however, the computer</span>
+<span class="comment">% doesn't do any approximations, it simply can do more steps than any human can ever hope to do without error.</span>
+
+<span class="comment">% In numerical computing, we specify a problem, and then crunch numbers in a very well-defined, carefully-constructed order.</span>
+<span class="comment">% If we are very careful about the way in which the numbers are crunched,</span>
+<span class="comment">% we can guarantee that the result is only slightly inaccurate, and usually close enough for its intended purpose.</span>
+<span class="comment">% Numerical solutions very rarely can contribute to proofs of new ideas.</span>
+<span class="comment">% Analytic solutions are generally considered to be "stronger".</span>
+<span class="comment">% The thinking goes that if we can get an analytic solution, it is exact,</span>
+<span class="comment">% and then if we need a number at the end of the day, we can just plug numbers into the analytic solution.</span>
+<span class="comment">% However, even if analytic solutions can be found, they might not be able to be computed quickly.</span>
+<span class="comment">% As a result, numerical approximation will never go away, and both approaches contribute holistically to the fields of mathematics and quantitative sciences.</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+
+
+%%%%%%%%%%%% Harmonic Wave Equation in 2D FD and Modes %%%%%%%%%%%%
+% By David, Patrobas, Andrew and Xiaochen
+% Febuary 24th, 2019
+% Assignment 2
+% Patrobas Adewumi
+global C;
+C.q_0 = 1.60217653e-19;             % electron charge
+C.hb = 1.054571596e-34;             % Dirac constant
+C.h = C.hb * 2 * pi;                    % Planck constant
+C.m_0 = 9.10938215e-31;             % electron mass
+C.kb = 1.3806504e-23;               % Boltzmann constant
+C.eps_0 = 8.854187817e-12;          % vacuum permittivity
+C.mu_0 = 1.2566370614e-6;           % vacuum permeability
+C.c = 299792458; % speed of light
+
+nx = 75;
+L = nx;% length
+ny = 50;
+W = ny; % width
+
+dx = 1;
+dy = 1;
+G = sparse(nx*ny, ny*nx);
+V = ones(nx*ny,1);
+alpha = (C.hb^2) / (2 * C.m_0);
+
+map = @(i,j) j + (i - 1)*ny;
+
+%%%%%%%%%%%%%%%%%%%%%%% Part a %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set boundary conditions 
+
+for i=1:nx
+    for j=1:ny
+        n = map(i,j);
+        nxm = map(i-1,j);
+        nxp = map(i+1,j);
+        nym = map(i,j-1);
+        nyp = map(i,j+1);
+        
+        % when Length = 0 (V = Vo)
+        if i == 1
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 1;
+        % When lenght is some given length, L (V = 0)
+        elseif i == nx
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 0;
+        elseif (j == 1 || j == ny)
+            G(n,:) = 0;
+            G(n,n) = -3;
+            G(n,nxm) = 1;
+            G(n,nxp) = 1;
+            G(n,nyp) = 1;
+        else
+            G(n,:) = 0;
+            G(n,n) = -4;
+            G(n,nxm) = 1;
+            G(n,nxp) = 1;
+            G(n,nym) = 1;
+            G(n,nyp) = 1;
+
+        end
+    end
+end
+
+
+% GV = F Solve for F
+F = G\V;
+surfs_up = zeros(nx,ny);
+for i = 1:nx
+    for j = 1:ny
+        n = map(i,j);
+        surfs_up(i,j) = F(n);
+    end
+end
+
+figure(1)
+surf(surfs_up)
+% I am a simple man and so is the colormap
+colormap default
+shading interp
+colorbar
+
+title('Electrostatic Potential in Rectangular Region L/W = 3/2')
+xlabel('Width')
+ylabel('Length')
+zlabel('Voltage')
+
+%%%%%%%%%%%%%%%%%%%%%%% Part b %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set boundary conditions
+
+for i=1:nx
+  
+    for j=1:ny
+        n = map(i,j);
+        nxm = map(i-1,j);
+        nxp = map(i+1,j);
+        nym = map(i,j-1);
+        nyp = map(i,j+1);
+        
+     
+        if i == 1
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 1;
+       
+        elseif i == nx
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 1;
+        elseif j == 1
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 0;
+        elseif j == ny
+            G(n,:) = 0;
+            G(n,n) = 1;
+            V(n) = 0;
+        else
+            G(n,:) = 0;
+            G(n,n) = -4;
+            G(n,nxm) = 1;
+            G(n,nxp) = 1;
+            G(n,nym) = 1;
+            G(n,nyp) = 1;
+        end
+    end
+end
+
+% GV = F Solve for F
+F = G\V;
+% Set up a surf plot
+surfs_up = ones(nx,ny);
+for i = 1:nx
+    for j = 1:ny
+        n = map(i,j);
+        surfs_up(i,j) = F(n);
+    end
+end
+
+figure(2)
+surf(surfs_up)
+% I am a simple man and so is the colormap
+colormap default
+shading flat
+colorbar
+
+title('Electrostatic Potential in Rectangular Region L/W = 3/2')
+xlabel('Width')
+ylabel('Length')
+zlabel('Voltage')
+
+
+%% Publish this report 
+% Meshing becomes an accurate tool when the amount of points used becomes near infinite
+% Analytical solutions can be obtained exactly with pencil and paper;
+% Numerical solutions cannot be obtained exactly in finite time and typically cannot be solved using pencil and paper.
+
+% These distinctions, however, can vary. There are increasingly many theorems 
+% and equations that can only be solved using a computer; however, the computer 
+% doesn't do any approximations, it simply can do more steps than any human can ever hope to do without error. 
+ 
+% In numerical computing, we specify a problem, and then crunch numbers in a very well-defined, carefully-constructed order. 
+% If we are very careful about the way in which the numbers are crunched, 
+% we can guarantee that the result is only slightly inaccurate, and usually close enough for its intended purpose.
+% Numerical solutions very rarely can contribute to proofs of new ideas. 
+% Analytic solutions are generally considered to be "stronger". 
+% The thinking goes that if we can get an analytic solution, it is exact, 
+% and then if we need a number at the end of the day, we can just plug numbers into the analytic solution.  
+% However, even if analytic solutions can be found, they might not be able to be computed quickly. 
+% As a result, numerical approximation will never go away, and both approaches contribute holistically to the fields of mathematics and quantitative sciences.
+
+##### SOURCE END #####
+--></body></html>
